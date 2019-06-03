@@ -13,7 +13,8 @@ Then clone this project or download the zip file from github and extract it into
 1. Go to install directory `<your project>/vagrant` directory on your local system
 2. run `vagrant up`
     In case you have any issues with the chef-solo recipes, run `vagrant provision`
-Run `vagrant destroy` in case you want to remove this VM from your system.
+
+**Note**: Run `vagrant destroy` in case you want to remove this VM from your system.
 
 The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to your `<your project>` directory in the host system ).
 
@@ -37,7 +38,7 @@ Arguments:
     (Optional) Number of workers to be instantiated in the cluster. Default is 3
 
 ```
-Run `./setupCluster.sh -cn test -s 4` to create a `test` cluster with 4 worker nodes
+Run `./setupCluster.sh -cn test -s 4` to create a **test** cluster with 4 worker nodes
 
 Run `docker ps` and you should see the cluster nodes
 
@@ -53,7 +54,7 @@ e0fb0f196ac5        docker:dind         "dockerd-entrypoint.…"   40 seconds ag
 The cluster is comprised of: 
 1. A manager node (test_manager_1), a python web server (based on flask) that exposes the cluster REST APIs
 2. A Redis db (test_redis_1), to store cluster data
-3. One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` image (https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
+3. One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` [image](https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
 
 ### Getting Cluster Stats 
 ```
@@ -72,7 +73,7 @@ curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/sta
 curl -H "Content-Type: application/json" -X POST -d '{"service": "hello-world" , "image":"crccheck/hello-world", "replicas" : 3 }' http://localhost:5000/api/v1/service
 ```
 
-### Checking `worker` nodes directly via `manager` container
+### Checking *worker* nodes directly via *manager* container
 
 ```
 docker exec -it test_manager_1 docker -H test_worker_1 ps
@@ -83,7 +84,7 @@ docker exec -it test_manager_1 docker -H test_worker_4 ps
 
 ### Managing the Cluster
 
-Go to the `cluster` directory
+Go to the `/mycluster/cluster` directory
 
 ```
 cd /mycluster/cluster
