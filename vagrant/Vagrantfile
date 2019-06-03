@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell do |sh|
         sh.inline = <<-EOF
             # TODO Replace this by a separate script file
-            echo "pipedrive:any provisioning scripts should go here"
+            echo "Any provisioning scripts should go here"
          EOF
     end
 
