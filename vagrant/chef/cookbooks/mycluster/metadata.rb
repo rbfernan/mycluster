@@ -1,6 +1,6 @@
 name             'mycluster'
 maintainer       'rodrigo'
-maintainer_email 'bragarodrigo@hotmail.com'
+maintainer_email 'rbfernan@users.noreply.github.com'
 license          'all_rights'
 version          '0.1.0'
 

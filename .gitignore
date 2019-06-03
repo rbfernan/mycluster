@@ -1,3 +1,2 @@
 *.log
-/cluster-repo/**
 /vagrant/.vagrant/**

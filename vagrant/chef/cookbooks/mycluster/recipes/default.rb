@@ -14,36 +14,28 @@ end
 
 bash 'Install Docker' do
     user 'root'
-    cwd '/tmp'
     code <<-EOH
     sudo apt-get update -y
     sudo apt install -y docker.io
     sudo systemctl start docker
     sudo systemctl enable docker
     EOH
+    cwd '/tmp'
 end
 
 bash 'Install Docker-compose' do
     user 'root'
-    cwd '/tmp'
-    code <<-EOH
+    code <<-EOH  
     sudo apt-get install -y docker-compose
-    EOH     
-end
-
-bash 'Install python3' do
-    user 'root'
-    cwd '/tmp'
-    code <<-EOH
-    sudo apt update -y
-    sudo apt install -y python3-pip
-    EOH     
-end
-
-bash 'Show results' do
-    user 'root'
-    cwd '/tmp'
-    code <<-EOH
-    echo "who am I: $(whoami) "
     EOH
+    cwd '/tmp'
 end
+
+# bash 'Install python3' do
+#     user 'root'    
+#     code <<-EOH
+#     sudo apt update -y
+#     sudo apt install -y python3-pip
+#     EOH
+#     cwd '/tmp'
+# end
