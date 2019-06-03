@@ -57,18 +57,31 @@ The cluster is comprised of:
 3. One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` [image](https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
 
 ### Getting Cluster Stats 
+
 ```
 curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/stats
+```
+
+*Response*
+
+```
 {"cluster.upTime": "0:04:42.057918", "services.totalOfRequests": 0, "services.totalOfContainers": 0}
 ```
 
 ### Checking Cluster State
+
 ```
 curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/state 
+```
+
+*Response*
+
+```
 {"cluster.name": "test", "cluster.numOfWorkers": 4, "cluster.workers": ["test_worker_1", "test_worker_2", "test_worker_3", "test_worker_4"], "cluster.servicesDef": []}
 ```
 
 ### Creating a new service
+
 ```
 curl -H "Content-Type: application/json" -X POST -d '{"service": "hello-world" , "image":"crccheck/hello-world", "replicas" : 3 }' http://localhost:5000/api/v1/service
 ```
@@ -77,9 +90,6 @@ curl -H "Content-Type: application/json" -X POST -d '{"service": "hello-world" ,
 
 ```
 docker exec -it test_manager_1 docker -H test_worker_1 ps
-docker exec -it test_manager_1 docker -H test_worker_2 ps
-docker exec -it test_manager_1 docker -H test_worker_3 ps
-docker exec -it test_manager_1 docker -H test_worker_4 ps
 ```
 
 ### Managing the Cluster
