@@ -10,19 +10,19 @@ Install virtualbox and vagrant in order to create the required enviroment for ru
 Then clone this project or download the zip file from github and extract it into your system.
 
 ### Running the ubuntu-18.05 bionic virtualbox
-1. Go to `<project>/vagrant` directory
+1. Go to install directory `<your project>/vagrant` directory on your local system
 2. run `vagrant up`
     In case you have any issues with the chef-solo recipes, run `vagrant provision`
 Run `vagrant destroy` in case you want to remove this VM from your system.
 
-The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to the `../` directory in the host system ).
+The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to your `<your project>` directory in the host system ).
 
 ### Setting up you cluster
 
 1. SSH to the VM `vagrant ssh`
 2. Switch to root user `sudo su -`
 3. Go to the `cluster` directory  `cd /mycluster/cluster`
-4. Setup a new cluster
+4. Setup the new cluster
 
 ```
  ./setupCluster.sh -h
@@ -83,9 +83,11 @@ docker exec -it test_manager_1 docker -H test_worker_4 ps
 
 ### Managing the Cluster
 
-Go to the `cluster` directory  `cd /<project>/cluster`
+Go to the `cluster` directory
 
 ```
+cd /mycluster/cluster
+
 ./manageCluster.sh -h
 Usage: ./manageCluster.sh [options]
 
