@@ -1,13 +1,14 @@
 # MyCluster project
 
 ## System Requirements
+MyCluster requires a Linux(ubuntu 18.05 or compatible) environment with docker and docker-compose installation. This project provide Vagrant/Chef scripts to create a virtual machine with those requirements.
+
 Install virtualbox and vagrant in order to create the required enviroment for running the mycluster components
 
 [VirtualBox download](https://www.virtualbox.org/)
 
 [Vagrant download](https://www.vagrantup.com/downloads.html)
 
-Then clone this project or download the zip file from github and extract it into your system.
 
 ### Running the ubuntu-18.05 bionic virtualbox
 1. Go to install directory `<your project>/vagrant` directory on your local system
@@ -18,12 +19,16 @@ Then clone this project or download the zip file from github and extract it into
 
 The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to your `<your project>` directory in the host system ).
 
+### Clone MyCluster project on your environment
+Clone this project or download the zip file from github and extract it into your system.
+
+`git clone https://github.com/rbfernan/mycluster.git`
+
 ### Setting up you cluster
 
-1. SSH to the VM `vagrant ssh`
-2. Switch to root user `sudo su -`
-3. Go to the `cluster` directory  `cd /mycluster/cluster`
-4. Setup the new cluster
+1. SSH to the VM `vagrant ssh` and switch to root user `sudo su -`  (if running on the virtualbox env)
+2. Go to the `cluster` directory  `cd /mycluster/cluster`
+3. Setup the new cluster
 
 ```
  ./setupCluster.sh -h
@@ -84,6 +89,17 @@ curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/sta
 
 ```
 curl -H "Content-Type: application/json" -X POST -d '{"service": "hello-world" , "image":"crccheck/hello-world", "replicas" : 3 }' http://localhost:5000/api/v1/service
+```
+*Check the registered service*
+
+```
+curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/service/hello-world
+```
+
+*Response*
+
+```
+{"service": "hello-world", "image": "crccheck/hello-world", "replicas": 3, "last_updated": 1559662887}
 ```
 
 ### Checking *worker* nodes directly via *manager* container
