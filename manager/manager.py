@@ -32,11 +32,41 @@ def getClusterState():
     event = {   
         "cluster.name" :  config.getClusterName(),
         "cluster.numOfWorkers" : config.getNumOfClusterWorkers(),
-        "cluster.workers" : getWorkerIds(),        
+        "cluster.workers" : getyWorkersState(),
         "cluster.servicesDef" : listOfServices
     }
     return event
-   
+
+def getyWorkersState():
+    listOfWorkers=[]
+    workerIds=getWorkerIds()
+    for workerId in workerIds:
+        workerDict = {
+            "worker" : workerId,
+            "serviceInstances" :  getInstancesbyWorkerFromDocker(workerId)
+        } 
+        listOfWorkers.append(workerDict)
+    return listOfWorkers
+
+def getInstancesbyWorkerFromDocker(workerId, allContainers=False):
+    keys = db.keys( "worker." + workerId + ".containers." + "*")
+    listOfImagesInstances=[]
+    for key in keys:
+       sKey=str(key,config.DEFAULT_ENCODING)
+       image=sKey.split(".")[-1]
+       client = docker.DockerClient(base_url='tcp://' + workerId +':'+ str(config.DEFAULT_DOCKER_PORT))
+       containers = client.containers.list(allContainers, filters={"ancestor":image})
+       listOfImagesInstances.append( {"image" : image, "numOfRunningContainers" :len(containers) })
+    return listOfImagesInstances
+
+def getInstancesbyWorkerFromDb(workerId):
+    keys = db.keys( "worker." + workerId + ".containers." + "*")
+    listOfImagesInstances=[]
+    for key in keys:
+       sKey=str(key,config.DEFAULT_ENCODING)
+       image=sKey.split(".")[-1]
+       listOfImagesInstances.append( {"image" : image, "numOfContainers" : int(db.get(str(key,config.DEFAULT_ENCODING)))})
+    return listOfImagesInstances
 
 # def get_hit_count():
 #     retries = 5
@@ -48,7 +78,6 @@ def getClusterState():
 #                 raise exc
 #             retries -= 1
 #             time.sleep(0.5)
-
 
 #
 # get worker ids from system configuration
