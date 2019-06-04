@@ -5,8 +5,8 @@
 # pip install flask
 # pip install redis
 
-import flask ,redis , time, json, logging,  datetime
-import config, cluster
+import flask , time, json, logging,  datetime
+import config, manager
 from flask import Flask
 from flask import request
 from flask import Response, stream_with_context
@@ -15,51 +15,6 @@ from flask_expects_json import expects_json
 
 app = Flask(__name__)
 app.debug = False
-#connect to server
-db = redis.Redis(host=cluster.getClusterName()+"_redis_1", port=config.DEFAULT_REDIS_PORT) 
-managerStartUpTime = datetime.datetime.now() 
-
-def getClusterStats():
-    statsRequests = 0
-    statsContainers = 0
-    if db.exists(config.STATS_SEVICE_REQUESTS):
-        statsRequests= int(db.get(config.STATS_SEVICE_REQUESTS))    
-    if db.exists(config.STATS_SEVICE_CONTAINERS):
-        statsContainers= int(db.get(config.STATS_SEVICE_CONTAINERS))
-
-    event = {   
-        "cluster.upTime" : str((datetime.datetime.now()- managerStartUpTime)),
-        "services.totalOfRequests" : statsRequests,   
-        "services.totalOfContainers" : statsContainers               
-    }
-    return event
-
-def getClusterState():  
-
-    listOfServices=[]
-    keys = db.keys(config.NS_SERVICES + "*")
-    for key in keys:
-       listOfServices.append(json.loads(db.get(str(key,config.DEFAULT_ENCODING))))
-
-    event = {   
-        "cluster.name" :  cluster.getClusterName(),
-        "cluster.numOfWorkers" : cluster.getNumOfClusterWorkers(),
-        "cluster.workers" : cluster.getWorkerIds(),        
-        "cluster.servicesDef" : listOfServices
-    }
-    return event
-   
-
-# def get_hit_count():
-#     retries = 5
-#     while True:
-#         try:
-#             return db.incr('stats.services.requests')
-#         except redis.exceptions.ConnectionError as exc:
-#             if retries == 0:
-#                 raise exc
-#             retries -= 1
-#             time.sleep(0.5)
 
 # Default unexpect exception
 @app.errorhandler(Exception)
@@ -83,20 +38,16 @@ def serviceCreate():
     event = request.json       
     serviceKey= config.NS_SERVICES + event['service']
     event['last_updated'] = int(time.time())
-    #remove old keys for simplicity for now TODO Review duplications
-    db.delete(serviceKey) 
+    #remove old keys for simplicity for now TODO Review duplications    
+    manager.deleteDbService(serviceKey)
 
     eventStr = json.dumps(event)
-    db.set(serviceKey, eventStr)
+    manager.setDbService(serviceKey, eventStr)
 
     # TODO Add error handling here
-    cluster.deployContainerToCluster(event['image'] , event['replicas'])
+    manager.deployContainerToCluster(event['image'] , event['replicas'])
 
-    # collect some Stats here    
-    db.incr(config.STATS_SEVICE_REQUESTS)
-    db.incr(config.STATS_SEVICE_CONTAINERS, event['replicas'])
-
-    stats=getClusterState()
+    stats = manager.getClusterState()
     return json.dumps(stats), 201
 
 
@@ -104,23 +55,23 @@ def serviceCreate():
 def service(service):
     event = request.json
     serviceKey= config.NS_SERVICES + service
-    if not db.exists(serviceKey):
+    if not manager.existsDbService(serviceKey):
         # TODO fix proper response
         return "Error: Service"+ str(service) +" was not registred for this cluster."   
 
-    event = db.get(serviceKey)
+    event = manager.getDbService(serviceKey)
     result = json.loads(event)
     print(f'this is the service event --> {event}')
     return json.dumps(result), 200
 
 @app.route(config.DEFAULT_API_PATH + "/state", methods = ['GET'])
 def state():
-    event = getClusterState()    
+    event = manager.getClusterState()    
     return json.dumps(event), 200
 
 @app.route(config.DEFAULT_API_PATH + "/stats", methods = ['GET'])
 def stats():
-    event = getClusterStats()    
+    event = manager.getClusterStats()    
     return json.dumps(event), 200
 
 @app.route("/testlog")

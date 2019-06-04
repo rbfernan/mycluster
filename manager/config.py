@@ -25,3 +25,9 @@ NS_SERVICES = "services."
 # Stats
 STATS_SEVICE_REQUESTS = "stats.services.requests"
 STATS_SEVICE_CONTAINERS = "stats.services.containers"
+
+def getClusterName():
+    return os.getenv('COMPOSE_PROJECT_NAME', DEFAULT_COMPOSE_PROJECT_NAME)
+
+def getNumOfClusterWorkers():
+    return int(os.getenv("SCALE_WORKERS",DEFAULT_SCALE_WORKERS))
