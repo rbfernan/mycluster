@@ -59,7 +59,7 @@ e0fb0f196ac5        docker:dind         "dockerd-entrypoint.…"   40 seconds ag
 The cluster is comprised of: 
 - A Manager node (test_manager_1), a python web server (based on flask) that exposes the cluster REST APIs
 - A Redis node (test_redis_1), to store cluster data
-- A Monitor for monitoring cluster nodes and rebalance services contairners as required in case of worker failure (to be implemented)
+- A Monitor agent for monitoring cluster nodes and rebalance services containers as required in case of any workers failure (to be implemented)
 - One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` [image](https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
 
 ### Getting Cluster Stats 
