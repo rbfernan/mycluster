@@ -9,20 +9,22 @@ Install virtualbox and vagrant in order to create the required enviroment for ru
 
 [Vagrant download](https://www.vagrantup.com/downloads.html)
 
+### Clone the MyCluster project on your environment
+Clone this project or download the zip file from github and extract it into your system.
+
+`git clone https://github.com/rbfernan/mycluster.git`
 
 ### Running the ubuntu-18.05 bionic virtualbox
 1. Go to install directory `<your project>/vagrant` directory on your local system
-2. run `vagrant up`
+2. run `vagrant up`   (This process can't take several minutes)
+
     In case you have any issues with the chef-solo recipes, run `vagrant provision`
 
 **Note**: Run `vagrant destroy` in case you want to remove this VM from your system.
 
 The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to your `<your project>` directory in the host system ).
 
-### Clone MyCluster project on your environment
-Clone this project or download the zip file from github and extract it into your system.
 
-`git clone https://github.com/rbfernan/mycluster.git`
 
 ### Setting up you cluster
 
