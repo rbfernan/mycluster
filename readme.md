@@ -59,7 +59,7 @@ e0fb0f196ac5        docker:dind         "dockerd-entrypoint.…"   40 seconds ag
 The cluster is comprised of: 
 - A Manager node (test_manager_1), a python web server (based on flask) that exposes the cluster REST APIs
 - A Redis node (test_redis_1), to store cluster data
-- A Monitor agent for monitoring cluster nodes and rebalance services containers as required in case of any workers failure (to be implemented)
+- A Monitor agent node for monitoring cluster worker nodes and relocate services containers as required in case of any failures
 - One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` [image](https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
 
 ### Getting Cluster Stats 
@@ -71,7 +71,7 @@ curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/sta
 *Response*
 
 ```
-{"cluster.upTime": "0:04:42.057918", "services.totalOfRequests": 0, "services.totalOfContainers": 0}
+{"cluster.upTime": "0:03:45.060206", "services.totalOfRequests": 0, "services.totalOfContainers": 0, "workers.failures": 0, "containers.relocated": 0}
 ```
 
 ### Checking Cluster State
@@ -141,3 +141,40 @@ Stopping all cluster containers
 Removing all cluster containers
 
 `./manageCluster.sh -c rm`
+
+### Checking the Monitor agent
+
+Go to the `/mycluster/cluster` directory
+
+``` 
+docker logs -f test_monitor_1
+```
+
+Stop one of the workers nodes
+
+``` 
+docker stop test_worker_1
+```
+
+Check the monitor log 
+```
+[2019-06-06 11:28:28,383] {monitor.py:12} INFO - Starting monitor agent
+[2019-06-06 11:28:28,579] {monitor.py:23} ERROR - Worker test_worker_1 was not found... realocating its services
+[2019-06-06 11:28:28,587] {/code/manager.py:214} INFO - Realocating services from worker test_worker_1
+[2019-06-06 11:28:28,727] {/code/manager.py:114} ERROR - Worker test_worker_1 seems to be down.. skipping to next in the queue.
+[2019-06-06 11:28:28,865] {/code/manager.py:161} INFO -  Total of 1 containers started on test_worker_2
+[2019-06-06 11:28:28,868] {/code/manager.py:162} INFO - [<Container: 7b6268a006>]
+[2019-06-06 11:28:28,911] {/code/manager.py:161} INFO -  Total of 1 containers started on test_worker_3
+[2019-06-06 11:28:28,912] {/code/manager.py:162} INFO - [<Container: 8c452d4920>]
+[2019-06-06 11:28:28,943] {/code/manager.py:161} INFO -  Total of 0 containers started on test_worker_4
+[2019-06-06 11:28:28,944] {/code/manager.py:162} INFO - []
+[2019-06-06 11:28:28,969] {/code/manager.py:193} INFO - New crccheck/hello-world container will be deployed to test_worker_4
+[2019-06-06 11:28:36,155] {/code/manager.py:176} INFO - docker container wizardly_villani started on test_worker_4
+[2019-06-06 11:28:36,237] {/code/manager.py:161} INFO -  Total of 1 containers started on test_worker_2
+[2019-06-06 11:28:36,239] {/code/manager.py:162} INFO - [<Container: 7b6268a006>]
+[2019-06-06 11:28:36,299] {/code/manager.py:161} INFO -  Total of 1 containers started on test_worker_3
+[2019-06-06 11:28:36,299] {/code/manager.py:162} INFO - [<Container: 8c452d4920>]
+[2019-06-06 11:28:36,347] {/code/manager.py:161} INFO -  Total of 1 containers started on test_worker_4
+[2019-06-06 11:28:36,347] {/code/manager.py:162} INFO - [<Container: 353845a235>]
+[2019-06-06 11:28:36,360] {monitor.py:14} INFO - Stopping monitor agent
+````
