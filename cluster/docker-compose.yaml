@@ -1,7 +1,9 @@
 version: '3'
 services:
   manager:
-    build: ../manager/.
+    build: 
+      context: ../manager/.
+      dockerfile: manager.Dockerfile
     ports:
      - "5000:5000"
     env_file:
@@ -13,3 +15,9 @@ services:
     privileged: true
     depends_on:
       - manager
+  monitor:
+    build: 
+      context: ../manager/.
+      dockerfile: monitor.Dockerfile
+    env_file:
+    - mycluster.env
