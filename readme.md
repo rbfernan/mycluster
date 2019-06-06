@@ -50,19 +50,20 @@ Run `./setupCluster.sh -cn test -s 4` to create a **test** cluster with 4 worker
 Run `docker ps` and you should see the cluster nodes
 
 ```
-CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                    NAMES
-adbc8c1365b6        docker:dind         "dockerd-entrypoint.…"   32 seconds ago       Up 29 seconds       2375/tcp                 test_worker_4
-aab91dad98b6        docker:dind         "dockerd-entrypoint.…"   40 seconds ago       Up 33 seconds       2375/tcp                 test_worker_3
-e0fb0f196ac5        docker:dind         "dockerd-entrypoint.…"   40 seconds ago       Up 34 seconds       2375/tcp                 test_worker_2
-42a072398fe3        docker:dind         "dockerd-entrypoint.…"   40 seconds ago       Up 35 seconds       2375/tcp                 test_worker_1
-094713d49960        test_manager        "python3 app.py"         46 seconds ago       Up 43 seconds       0.0.0.0:5000->5000/tcp   test_manager_1
-991f0d85907a        redis:alpine        "docker-entrypoint.s…"   About a minute ago   Up About a minute   6379/tcp                 test_redis_1
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
+877bc28ffd21        docker:dind         "dockerd-entrypoint.…"   11 minutes ago      Up 11 minutes       2375/tcp                 test_worker_3
+792a43f240cb        docker:dind         "dockerd-entrypoint.…"   11 minutes ago      Up 11 minutes       2375/tcp                 test_worker_1
+bd5fe14a589d        docker:dind         "dockerd-entrypoint.…"   11 minutes ago      Up 11 minutes       2375/tcp                 test_worker_4
+8cb064bccb53        docker:dind         "dockerd-entrypoint.…"   11 minutes ago      Up 11 minutes       2375/tcp                 test_worker_2
+eff48b63dbc5        test_monitor        "python3 monitor.py"     11 minutes ago      Up 11 minutes                                test_monitor_1
+73d9c39bd16d        test_manager        "python3 app.py"         11 minutes ago      Up 11 minutes       0.0.0.0:5000->5000/tcp   test_manager_1
+67ff146f6066        redis:alpine        "docker-entrypoint.s…"   11 minutes ago      Up 11 minutes       6379/tcp                 test_redis_1
 ```
 The cluster is comprised of: 
-- A Manager node (test_manager_1), a python web server (based on flask) that exposes the cluster REST APIs
-- A Redis node (test_redis_1), to store cluster data
-- A Monitor agent node for monitoring cluster worker nodes and relocate services containers as required in case of any failures
-- One or many Workers (test_worker_1 to test_worker_4), based on the docker `docker:dind` [image](https://github.com/jpetazzo/dind) to run the application workloads (docker containers)
+- A Manager node *(test_manager_1)*, a python web server (based on flask) that exposes the cluster REST APIs
+- A Redis node *(test_redis_1)*, to store cluster data
+- A Monitor agent node *(test_monitor_1)* for monitoring cluster worker nodes and relocate services containers as required in case of any failures (running by default on a 30 sec interval)
+- One or many Workers *(test_worker_1 to test_worker_4)*, based on the docker [`docker:dind`](https://github.com/jpetazzo/dind) image to run application workloads (docker containers)
 
 ### Getting Cluster Stats 
 
