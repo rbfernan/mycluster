@@ -6,19 +6,23 @@ logger = logging.getLogger(__name__)
 #connect to server
 db = redis.Redis(host=config.getClusterName()+"_redis_1", port=config.DEFAULT_REDIS_PORT) 
 managerStartUpTime = datetime.datetime.now() 
+#resetting stats since restart
+db.set(config.STATS_WORKERS_FAILURES,0)
+db.set(config.STATS_CONTAINERS_RELOCATIONS,0)
 
 def getClusterStats():
-    statsRequests = 0
-    statsContainers = 0
-    if db.exists(config.STATS_SEVICE_REQUESTS):
-        statsRequests= int(db.get(config.STATS_SEVICE_REQUESTS))    
-    if db.exists(config.STATS_SEVICE_CONTAINERS):
-        statsContainers= int(db.get(config.STATS_SEVICE_CONTAINERS))
+   
+    statsRequests= getDbStatistics(config.STATS_SERVICE_REQUESTS)    
+    statsContainers= getDbStatistics(config.STATS_SERVICE_CONTAINERS)
+    statsWorkersFailures= getDbStatistics(config.STATS_WORKERS_FAILURES)
+    statsContainersReloc= getDbStatistics(config.STATS_CONTAINERS_RELOCATIONS)
 
     event = {   
         "cluster.upTime" : str((datetime.datetime.now()- managerStartUpTime)),
         "services.totalOfRequests" : statsRequests,   
-        "services.totalOfContainers" : statsContainers               
+        "services.totalOfContainers" : statsContainers,               
+        "workers.failures" : statsWorkersFailures,       
+        "containers.relocated" : statsContainersReloc       
     }
     return event
 
@@ -155,8 +159,8 @@ def getTotalOfContainersForWorker(workerId):
     try:
         client = docker.DockerClient(base_url='tcp://' + workerId +':'+ str(config.DEFAULT_DOCKER_PORT))
         containers = client.containers.list()
-        print (f' Total of {len(containers)} containers started on {workerId}')
-        print(containers)
+        logger.info(f' Total of {len(containers)} containers started on {workerId}')
+        logger.info(str(containers))
         return len(containers)
         #return randint(0, 3)
 
@@ -170,10 +174,7 @@ def deployContainerToWorker(workerId, image):
         #client = docker.DockerClient(base_url='tcp://localhost:2375')
         client = docker.DockerClient(base_url='tcp://' + workerId +':'+ str(config.DEFAULT_DOCKER_PORT))
         container = client.containers.run(image, detach=True)
-        print (f'docker container {container.name} started on {workerId}')
-    # except requests.exceptions.ConnectionError as e:
-    #     logger.error(f"Worker {workerId} was not found... realocating its services")
-    #     raise e
+        logger.info(f'docker container {container.name} started on {workerId}')
     except Exception as error:
         logger.error(error)
         raise error
@@ -183,9 +184,9 @@ def deployContainerToCluster(image, replicas):
     logger.debug(f"deployContainerToCluster, workers= {workers}" )
 
    # collect some Stats here    
-    db.incr(config.STATS_SEVICE_REQUESTS)
+    db.incr(config.STATS_SERVICE_REQUESTS)
     success = False
-    #db.incr(config.STATS_SEVICE_CONTAINERS, replicas)
+    #db.incr(config.STATS_SERVICE_CONTAINERS, replicas)
     for i in range(replicas): 
         nextWorkerToDeploy = getNextWorkerToDeploy(workers)
         if nextWorkerToDeploy != None:
@@ -196,7 +197,7 @@ def deployContainerToCluster(image, replicas):
                 # increment containers for worker/image
                 workerContainers = getWorkerContainersDbKey(nextWorkerToDeploy,image)
                 db.incr(workerContainers)
-                db.incr(config.STATS_SEVICE_CONTAINERS)
+                db.incr(config.STATS_SERVICE_CONTAINERS)
             except Exception as error:
                 logger.error(error)
                 raise
@@ -211,7 +212,10 @@ def deployContainerToCluster(image, replicas):
 # Realocate service instances from a given worker to other available workers
 # 
 def realocateServices(workerId):
-     logger.info(f"Realocating services from worker {workerId}")
+     logger.info(f"Realocating services from worker {workerId}")     
+     # Collecting stats
+     incrDbStatistics(config.STATS_WORKERS_FAILURES)
+
      lstImages = getInstancesbyWorkerFromDb(workerId)
      logger.debug(f"lstImages = {lstImages}" )
      for imageDict in lstImages:
@@ -219,6 +223,8 @@ def realocateServices(workerId):
         numOfContainers = imageDict["numOfContainers"]
         if numOfContainers > 0: 
             logger.debug(f"realocating image {image} , {numOfContainers} containers")
+            # Collecting stats
+            incrDbStatistics(config.STATS_CONTAINERS_RELOCATIONS,numOfContainers)
             if deployContainerToCluster(image, numOfContainers):
                 decrDbWorkerImage(workerId, image,numOfContainers)
         else:
@@ -244,6 +250,15 @@ def existsDbService(serviceKey):
 def decrDbWorkerImage(workerId, image, amount=1):
     name = getWorkerContainersDbKey(workerId,image)
     db.decr(name, amount)
+
+def incrDbStatistics(name, amount=1):
+    db.incr(name, amount)
+
+def getDbStatistics(name):
+    if db.exists(name):
+       return int(db.get(name))
+    else:
+        return 0   
 
 if __name__ == "__main__":
     # TO be run on a short interval

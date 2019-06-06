@@ -23,8 +23,10 @@ DEFAULT_SCALE_WORKERS = 0
 NS_SERVICES = "services."
 
 # Stats
-STATS_SEVICE_REQUESTS = "stats.services.requests"
-STATS_SEVICE_CONTAINERS = "stats.services.containers"
+STATS_SERVICE_REQUESTS = "stats.services.requests"
+STATS_SERVICE_CONTAINERS = "stats.services.containers"
+STATS_WORKERS_FAILURES = "stats.workers.failures"
+STATS_CONTAINERS_RELOCATIONS = "stats.containers.relocations"
 
 # Monitor
 MONITOR_EXEC_INTERVAL=30.0
