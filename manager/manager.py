@@ -261,7 +261,6 @@ def getDbStatistics(name):
         return 0   
 
 if __name__ == "__main__":
-    # TO be run on a short interval
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
