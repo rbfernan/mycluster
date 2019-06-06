@@ -57,7 +57,7 @@ def service(service):
     serviceKey= config.NS_SERVICES + service
     if not manager.existsDbService(serviceKey):
         # TODO fix proper response
-        return "Error: Service"+ str(service) +" was not registred for this cluster."   
+        return json.dumps({"message" : "Service "+ str(service) +" was not registred for this cluster.", "code" : 404 }), 404
 
     event = manager.getDbService(serviceKey)
     result = json.loads(event)

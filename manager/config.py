@@ -26,6 +26,9 @@ NS_SERVICES = "services."
 STATS_SEVICE_REQUESTS = "stats.services.requests"
 STATS_SEVICE_CONTAINERS = "stats.services.containers"
 
+# Monitor
+MONITOR_EXEC_INTERVAL=30.0
+
 def getClusterName():
     return os.getenv('COMPOSE_PROJECT_NAME', DEFAULT_COMPOSE_PROJECT_NAME)
 
