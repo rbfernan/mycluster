@@ -14,7 +14,7 @@ from logging.handlers import RotatingFileHandler
 from flask_expects_json import expects_json
 
 app = Flask(__name__)
-app.debug = False
+app.debug = True
 
 # Default unexpect exception
 @app.errorhandler(Exception)
