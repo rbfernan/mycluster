@@ -1,13 +1,13 @@
 # MyCluster project
 
 ## System Requirements
-MyCluster requires a Linux(ubuntu 18.05 or compatible) environment with docker and docker-compose installation. This project provide Vagrant/Chef scripts to create a virtual machine with those requirements.
-
-Install virtualbox and vagrant in order to create the required enviroment for running the mycluster components
+MyCluster only requires a Linux(ubuntu 18.05 or compatible) with docker and docker-compose installed. The project also provides Vagrant/Chef scripts to create the Linux virtual machine with the base requirements. Follow the links bellow to install Virtualbox and Vagrant in order to run them:
 
 [VirtualBox download](https://www.virtualbox.org/)
 
 [Vagrant download](https://www.vagrantup.com/downloads.html)
+
+After the installation, please follow the steps below:
 
 ### Clone the MyCluster project on your environment
 Clone this project or download the zip file from github and extract it into your system.
@@ -20,17 +20,16 @@ Clone this project or download the zip file from github and extract it into your
 
     In case you have any issues with the chef-solo recipes, run `vagrant provision`
 
-**Note**: Run `vagrant destroy` in case you want to remove this VM from your system.
+**Note**: Run `vagrant destroy` in case you want to remove this VM from your system later on.
 
-The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linked to your `<your project>` directory in the host system ).
-
+The mycluster chef recipe will install  the required softwares (docker and docker-compose) into the VM and create the `/mycluster` diretctory (linking it to `<your project>` directory in the host system ).
 
 
 ### Setting up you cluster
 
 1. SSH to the VM `vagrant ssh` and switch to root user `sudo su -`  (if running on the virtualbox env)
 2. Go to the `cluster` directory  `cd /mycluster/cluster`
-3. Setup the new cluster
+3. Setup a new cluster
 
 ```
  ./setupCluster.sh -h
@@ -145,21 +144,23 @@ Removing all cluster containers
 
 `./manageCluster.sh -c rm`
 
-### Checking the Monitor agent
+### Checking the Monitor agent logs
 
-Go to the `/mycluster/cluster` directory
+For checking the log
 
 ``` 
 docker logs -f test_monitor_1
 ```
 
-Stop one of the workers nodes
+### Simulating a Failure
+
+To simulate a failure in one of the workers node and see the automatic relocation of its containers to the remaining available nodes.
 
 ``` 
 docker stop test_worker_1
 ```
 
-Check the monitor log 
+See the detailed info in the monitor log output
 ```
 [2019-06-06 11:28:28,383] {monitor.py:12} INFO - Starting monitor agent
 [2019-06-06 11:28:28,579] {monitor.py:23} ERROR - Worker test_worker_1 was not found... realocating its services
